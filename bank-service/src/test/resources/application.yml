@@ -1,0 +1,7 @@
+spring:
+  kafka:
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+
+bank:
+  simulator:
+    interval-ms: 60000

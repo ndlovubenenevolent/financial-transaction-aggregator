@@ -1,0 +1,22 @@
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY common-events/pom.xml common-events/pom.xml
+COPY bank-service/pom.xml bank-service/pom.xml
+COPY credit-card-service/pom.xml credit-card-service/pom.xml
+COPY investment-service/pom.xml investment-service/pom.xml
+COPY aggregator-service/pom.xml aggregator-service/pom.xml
+RUN mvn -pl credit-card-service -am dependency:go-offline -B
+COPY common-events/src common-events/src
+COPY credit-card-service/src credit-card-service/src
+RUN mvn -pl credit-card-service -am package -DskipTests -B
+
+FROM eclipse-temurin:21-jre-alpine
+RUN addgroup -S app && adduser -S app -G app
+WORKDIR /app
+COPY --from=build /app/credit-card-service/target/*.jar app.jar
+USER app
+EXPOSE 8082
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -qO- http://localhost:8082/actuator/health | grep -q '"status":"UP"' || exit 1
+ENTRYPOINT ["java", "-jar", "app.jar"]
