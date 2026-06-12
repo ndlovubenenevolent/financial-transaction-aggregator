@@ -23,6 +23,8 @@ Investment Service ──► investment-transactions ──┘         │
 
 ## Quick Start
 
+Clone the repo and start the full stack — no `.env` file required:
+
 ```bash
 docker-compose up --build
 ```
@@ -36,7 +38,44 @@ docker-compose up --build
 | PostgreSQL | 5432 | `aggregator_db` |
 | Kafka | 9092 | Event broker |
 
-Wait ~60 seconds for producers to generate transactions, then query the API.
+Wait ~2 minutes for the stack to start and simulators to publish their first transactions, then query the API.
+
+## Environment Variables
+
+Configuration is optional. `docker-compose.yml` ships with sensible local defaults, so the project runs out of the box after cloning.
+
+To override settings (e.g. custom DB credentials or simulator intervals), create a `.env` file in the project root:
+
+```env
+# PostgreSQL
+POSTGRES_DB=aggregator_db
+POSTGRES_USER=aggregator
+POSTGRES_PASSWORD=aggregator
+POSTGRES_PORT=5432
+
+# Kafka
+KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+KAFKA_PORT=9092
+
+# Transaction simulator intervals (milliseconds)
+BANK_SIMULATOR_INTERVAL_MS=60000
+CARD_SIMULATOR_INTERVAL_MS=60000
+INVESTMENT_SIMULATOR_INTERVAL_MS=60000
+```
+
+The `.env` file is gitignored and never committed. Use it only for local overrides.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `POSTGRES_DB` | `aggregator_db` | Database name |
+| `POSTGRES_USER` | `aggregator` | Database user |
+| `POSTGRES_PASSWORD` | `aggregator` | Database password |
+| `POSTGRES_PORT` | `5432` | Host port for PostgreSQL (DBeaver, etc.) |
+| `KAFKA_BOOTSTRAP_SERVERS` | `kafka:9092` | Kafka address inside Docker network |
+| `KAFKA_PORT` | `9092` | Host port for Kafka |
+| `BANK_SIMULATOR_INTERVAL_MS` | `60000` | Bank publish interval |
+| `CARD_SIMULATOR_INTERVAL_MS` | `60000` | Credit card publish interval |
+| `INVESTMENT_SIMULATOR_INTERVAL_MS` | `60000` | Investment publish interval |
 
 ## API Documentation
 
