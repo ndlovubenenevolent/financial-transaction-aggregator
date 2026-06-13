@@ -61,6 +61,11 @@ KAFKA_PORT=9092
 BANK_SIMULATOR_INTERVAL_MS=60000
 CARD_SIMULATOR_INTERVAL_MS=60000
 INVESTMENT_SIMULATOR_INTERVAL_MS=60000
+
+# Random customer pool size per simulator (IDs: CUST-001 .. CUST-00N)
+BANK_SIMULATOR_CUSTOMER_POOL_SIZE=100
+CARD_SIMULATOR_CUSTOMER_POOL_SIZE=100
+INVESTMENT_SIMULATOR_CUSTOMER_POOL_SIZE=100
 ```
 
 The `.env` file is gitignored and never committed. Use it only for local overrides.
@@ -74,8 +79,11 @@ The `.env` file is gitignored and never committed. Use it only for local overrid
 | `KAFKA_BOOTSTRAP_SERVERS` | `kafka:9092` | Kafka address inside Docker network |
 | `KAFKA_PORT` | `9092` | Host port for Kafka |
 | `BANK_SIMULATOR_INTERVAL_MS` | `60000` | Bank publish interval |
+| `BANK_SIMULATOR_CUSTOMER_POOL_SIZE` | `100` | Random bank customer IDs (`CUST-001`–`CUST-100`) |
 | `CARD_SIMULATOR_INTERVAL_MS` | `60000` | Credit card publish interval |
+| `CARD_SIMULATOR_CUSTOMER_POOL_SIZE` | `100` | Random card customer IDs (`CUST-001`–`CUST-100`) |
 | `INVESTMENT_SIMULATOR_INTERVAL_MS` | `60000` | Investment publish interval |
+| `INVESTMENT_SIMULATOR_CUSTOMER_POOL_SIZE` | `100` | Random investment customer IDs (`CUST-001`–`CUST-100`) |
 | `RATE_LIMIT_ENABLED` | `true` | Enable per-client API rate limiting |
 | `RATE_LIMIT_REQUESTS_PER_MINUTE` | `100` | Max requests per client per minute |
 

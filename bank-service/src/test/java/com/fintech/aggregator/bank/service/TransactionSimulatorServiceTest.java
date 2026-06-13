@@ -29,7 +29,7 @@ class TransactionSimulatorServiceTest {
         verify(eventPublisher).publish(captor.capture());
         BankTransactionEvent event = captor.getValue();
         assertThat(event.getTransactionRef()).startsWith("BANK-");
-        assertThat(event.getAccountHolderId()).startsWith("CUST-");
+        assertThat(event.getAccountHolderId()).matches("CUST-\\d{3}");
         assertThat(event.getNarrative()).isNotBlank();
         assertThat(event.getValue()).isNotNull();
     }

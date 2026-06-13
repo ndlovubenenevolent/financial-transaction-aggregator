@@ -10,6 +10,7 @@ spring:
 card:
   simulator:
     interval-ms: ${CARD_SIMULATOR_INTERVAL_MS:60000}
+    customer-pool-size: ${CARD_SIMULATOR_CUSTOMER_POOL_SIZE:100}
 
 management:
   endpoints:

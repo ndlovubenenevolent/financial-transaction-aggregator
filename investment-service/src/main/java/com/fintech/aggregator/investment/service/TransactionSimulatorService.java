@@ -1,9 +1,11 @@
 package com.fintech.aggregator.investment.service;
 
+import com.fintech.aggregator.common.CustomerIdGenerator;
 import com.fintech.aggregator.common.events.InvestmentTransactionEvent;
 import com.fintech.aggregator.kafka.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +20,6 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class TransactionSimulatorService {
 
-    private static final List<String> CUSTOMERS = List.of(
-            "CUST-001", "CUST-002", "CUST-003", "CUST-004", "CUST-005"
-    );
-
     private static final List<InvestmentTemplate> TEMPLATES = List.of(
             new InvestmentTemplate("Share Purchase", new BigDecimal("-2500.00")),
             new InvestmentTemplate("ETF Purchase", new BigDecimal("-1500.00")),
@@ -30,10 +28,13 @@ public class TransactionSimulatorService {
 
     private final KafkaEventPublisher<InvestmentTransactionEvent> eventPublisher;
 
+    @Value("${investment.simulator.customer-pool-size:100}")
+    private int customerPoolSize = 100;
+
     @Scheduled(fixedDelayString = "${investment.simulator.interval-ms:60000}")
     public void generateTransaction() {
         InvestmentTemplate template = TEMPLATES.get(ThreadLocalRandom.current().nextInt(TEMPLATES.size()));
-        String customerId = CUSTOMERS.get(ThreadLocalRandom.current().nextInt(CUSTOMERS.size()));
+        String customerId = CustomerIdGenerator.randomCustomerId(customerPoolSize);
 
         InvestmentTransactionEvent event = InvestmentTransactionEvent.builder()
                 .tradeId("INV-" + UUID.randomUUID())

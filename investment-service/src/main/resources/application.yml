@@ -10,6 +10,7 @@ spring:
 investment:
   simulator:
     interval-ms: ${INVESTMENT_SIMULATOR_INTERVAL_MS:60000}
+    customer-pool-size: ${INVESTMENT_SIMULATOR_CUSTOMER_POOL_SIZE:100}
 
 management:
   endpoints:
