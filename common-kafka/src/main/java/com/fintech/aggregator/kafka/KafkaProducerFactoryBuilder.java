@@ -1,11 +1,7 @@
-package com.fintech.aggregator.bank.config;
+package com.fintech.aggregator.kafka;
 
-import com.fintech.aggregator.common.events.BankTransactionEvent;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -14,14 +10,12 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration
-public class KafkaProducerConfig {
+public final class KafkaProducerFactoryBuilder {
 
-    @Value("${spring.kafka.bootstrap-servers}")
-    private String bootstrapServers;
+    private KafkaProducerFactoryBuilder() {
+    }
 
-    @Bean
-    public ProducerFactory<String, BankTransactionEvent> producerFactory() {
+    public static Map<String, Object> baseProducerConfig(String bootstrapServers) {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -30,11 +24,14 @@ public class KafkaProducerConfig {
         config.put(ProducerConfig.RETRIES_CONFIG, 3);
         config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         config.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
-        return new DefaultKafkaProducerFactory<>(config);
+        return config;
     }
 
-    @Bean
-    public KafkaTemplate<String, BankTransactionEvent> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+    public static <T> ProducerFactory<String, T> createProducerFactory(String bootstrapServers) {
+        return new DefaultKafkaProducerFactory<>(baseProducerConfig(bootstrapServers));
+    }
+
+    public static <T> KafkaTemplate<String, T> createTemplate(String bootstrapServers) {
+        return new KafkaTemplate<>(createProducerFactory(bootstrapServers));
     }
 }

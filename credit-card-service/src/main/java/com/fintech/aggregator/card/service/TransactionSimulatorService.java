@@ -1,8 +1,9 @@
 package com.fintech.aggregator.card.service;
 
-import com.fintech.aggregator.card.kafka.KafkaTransactionProducer;
 import com.fintech.aggregator.common.events.CardTransactionEvent;
+import com.fintech.aggregator.kafka.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionSimulatorService {
@@ -27,7 +29,7 @@ public class TransactionSimulatorService {
             new CardTemplate("Woolworths", new BigDecimal("-420.75"))
     );
 
-    private final KafkaTransactionProducer producer;
+    private final KafkaEventPublisher<CardTransactionEvent> eventPublisher;
 
     @Scheduled(fixedDelayString = "${card.simulator.interval-ms:60000}")
     public void generateTransaction() {
@@ -42,7 +44,9 @@ public class TransactionSimulatorService {
                 .purchaseDate(Instant.now())
                 .build();
 
-        producer.publish(event);
+        log.debug("Simulating card transaction customerId={} eventId={} merchant={}",
+                customerId, event.getAuthId(), template.merchant());
+        eventPublisher.publish(event);
     }
 
     private record CardTemplate(String merchant, BigDecimal amount) {

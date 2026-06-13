@@ -3,7 +3,7 @@ package com.fintech.aggregator.aggregator.service;
 import com.fintech.aggregator.aggregator.dto.DashboardResponse;
 import com.fintech.aggregator.aggregator.entity.Transaction;
 import com.fintech.aggregator.aggregator.mapper.TransactionMapper;
-import com.fintech.aggregator.aggregator.repository.TransactionRepository;
+import com.fintech.aggregator.aggregator.repository.TransactionAnalyticsRepository;
 import com.fintech.aggregator.aggregator.util.CategoryBreakdownMapper;
 import com.fintech.aggregator.common.enums.TransactionCategory;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +20,15 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class DashboardService {
 
-    private final TransactionRepository transactionRepository;
+    private final TransactionAnalyticsRepository analyticsRepository;
     private final TransactionMapper transactionMapper;
 
     public DashboardResponse getDashboard(String customerId) {
-        BigDecimal totalBalance = transactionRepository.sumAmountByCustomerId(customerId);
-        long transactionCount = transactionRepository.countByCustomerId(customerId);
+        BigDecimal totalBalance = analyticsRepository.sumAmountByCustomerId(customerId);
+        long transactionCount = analyticsRepository.countByCustomerId(customerId);
         Map<TransactionCategory, BigDecimal> categoryBreakdown = CategoryBreakdownMapper.toMap(
-                transactionRepository.sumExpensesByCategory(customerId));
-        List<Transaction> recent = transactionRepository.findTop10ByCustomerIdOrderByTransactionDateDesc(customerId);
+                analyticsRepository.sumExpensesByCategory(customerId));
+        List<Transaction> recent = analyticsRepository.findTop10ByCustomerIdOrderByTransactionDateDesc(customerId);
 
         return DashboardResponse.builder()
                 .customerId(customerId)

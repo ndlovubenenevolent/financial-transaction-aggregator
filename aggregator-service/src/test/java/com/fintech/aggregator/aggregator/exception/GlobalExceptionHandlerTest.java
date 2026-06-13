@@ -9,8 +9,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -47,6 +49,23 @@ class GlobalExceptionHandlerTest {
         ConstraintViolationException ex = new ConstraintViolationException(java.util.Set.<ConstraintViolation<?>>of());
         ResponseEntity<ErrorResponse> response = handler.handleConstraintViolation(ex, request);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void shouldHandleAccessDenied() {
+        when(request.getRequestURI()).thenReturn("/api/v1/test");
+        ResponseEntity<ErrorResponse> response = handler.handleAccessDenied(
+                new AccessDeniedException("Forbidden"), request);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void shouldHandleInvalidDataAccessApiUsage() {
+        when(request.getRequestURI()).thenReturn("/api/v1/transactions");
+        ResponseEntity<ErrorResponse> response = handler.handleInvalidQuery(
+                new InvalidDataAccessApiUsageException("No property 'string' found for type 'Transaction'"), request);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().getMessage()).contains("string");
     }
 
     @Test

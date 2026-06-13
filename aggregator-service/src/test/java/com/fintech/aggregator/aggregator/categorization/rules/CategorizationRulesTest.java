@@ -15,6 +15,7 @@ class CategorizationRulesTest {
             new TransportRule(),
             new EntertainmentRule(),
             new GroceriesRule(),
+            new UtilitiesRule(),
             new InvestmentsRule(),
             new TransfersRule()
     );
@@ -25,6 +26,7 @@ class CategorizationRulesTest {
         assertRuleMatches("uber trip", TransactionCategory.TRANSPORT);
         assertRuleMatches("netflix", TransactionCategory.ENTERTAINMENT);
         assertRuleMatches("woolworths", TransactionCategory.GROCERIES);
+        assertRuleMatches("eskom payment", TransactionCategory.UTILITIES);
         assertRuleMatches("share purchase", TransactionCategory.INVESTMENTS);
         assertRuleMatches("eft transfer", TransactionCategory.TRANSFERS);
     }

@@ -11,6 +11,7 @@ import com.fintech.aggregator.common.enums.TransactionCategory;
 import com.fintech.aggregator.common.enums.TransactionSource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -43,7 +44,7 @@ public class TransactionController {
     @GetMapping("/transactions")
     @Operation(summary = "Get all transactions with pagination and sorting")
     public Page<TransactionResponse> getAllTransactions(
-            @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable) {
+            @ParameterObject @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable) {
         return transactionQueryService.findAll(pageable).map(transactionMapper::toResponse);
     }
 
@@ -51,7 +52,7 @@ public class TransactionController {
     @Operation(summary = "Get transactions for a specific customer")
     public Page<TransactionResponse> getCustomerTransactions(
             @PathVariable @NotBlank String customerId,
-            @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable) {
+            @ParameterObject @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable) {
         return transactionQueryService.findByCustomerId(customerId, pageable).map(transactionMapper::toResponse);
     }
 
@@ -59,7 +60,7 @@ public class TransactionController {
     @Operation(summary = "Filter transactions by category")
     public Page<TransactionResponse> getByCategory(
             @PathVariable TransactionCategory category,
-            @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable) {
+            @ParameterObject @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable) {
         return transactionQueryService.findByCategory(category, pageable).map(transactionMapper::toResponse);
     }
 
@@ -67,7 +68,7 @@ public class TransactionController {
     @Operation(summary = "Filter transactions by source")
     public Page<TransactionResponse> getBySource(
             @PathVariable TransactionSource source,
-            @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable) {
+            @ParameterObject @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable) {
         return transactionQueryService.findBySource(source, pageable).map(transactionMapper::toResponse);
     }
 

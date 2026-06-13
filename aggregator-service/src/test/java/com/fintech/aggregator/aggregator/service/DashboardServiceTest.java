@@ -4,7 +4,7 @@ import com.fintech.aggregator.aggregator.dto.DashboardResponse;
 import com.fintech.aggregator.aggregator.dto.TransactionResponse;
 import com.fintech.aggregator.aggregator.entity.Transaction;
 import com.fintech.aggregator.aggregator.mapper.TransactionMapper;
-import com.fintech.aggregator.aggregator.repository.TransactionRepository;
+import com.fintech.aggregator.aggregator.repository.TransactionAnalyticsRepository;
 import com.fintech.aggregator.common.enums.TransactionCategory;
 import com.fintech.aggregator.common.enums.TransactionSource;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 class DashboardServiceTest {
 
     @Mock
-    private TransactionRepository transactionRepository;
+    private TransactionAnalyticsRepository analyticsRepository;
 
     @Mock
     private TransactionMapper transactionMapper;
@@ -50,11 +50,11 @@ class DashboardServiceTest {
                 .customerId("CUST-001")
                 .build();
 
-        when(transactionRepository.sumAmountByCustomerId("CUST-001")).thenReturn(new BigDecimal("5000.00"));
-        when(transactionRepository.countByCustomerId("CUST-001")).thenReturn(3L);
-        when(transactionRepository.sumExpensesByCategory("CUST-001"))
+        when(analyticsRepository.sumAmountByCustomerId("CUST-001")).thenReturn(new BigDecimal("5000.00"));
+        when(analyticsRepository.countByCustomerId("CUST-001")).thenReturn(3L);
+        when(analyticsRepository.sumExpensesByCategory("CUST-001"))
                 .thenReturn(List.<Object[]>of(new Object[]{TransactionCategory.GROCERIES, new BigDecimal("100.00")}));
-        when(transactionRepository.findTop10ByCustomerIdOrderByTransactionDateDesc("CUST-001"))
+        when(analyticsRepository.findTop10ByCustomerIdOrderByTransactionDateDesc("CUST-001"))
                 .thenReturn(List.of(transaction));
         when(transactionMapper.toResponseList(List.of(transaction))).thenReturn(List.of(response));
 
@@ -67,10 +67,10 @@ class DashboardServiceTest {
 
     @Test
     void shouldReturnEmptyCategoryBreakdownWhenNoExpenses() {
-        when(transactionRepository.sumAmountByCustomerId("CUST-001")).thenReturn(BigDecimal.ZERO);
-        when(transactionRepository.countByCustomerId("CUST-001")).thenReturn(0L);
-        when(transactionRepository.sumExpensesByCategory("CUST-001")).thenReturn(List.of());
-        when(transactionRepository.findTop10ByCustomerIdOrderByTransactionDateDesc("CUST-001")).thenReturn(List.of());
+        when(analyticsRepository.sumAmountByCustomerId("CUST-001")).thenReturn(BigDecimal.ZERO);
+        when(analyticsRepository.countByCustomerId("CUST-001")).thenReturn(0L);
+        when(analyticsRepository.sumExpensesByCategory("CUST-001")).thenReturn(List.of());
+        when(analyticsRepository.findTop10ByCustomerIdOrderByTransactionDateDesc("CUST-001")).thenReturn(List.of());
         when(transactionMapper.toResponseList(List.of())).thenReturn(List.of());
 
         DashboardResponse dashboard = dashboardService.getDashboard("CUST-001");

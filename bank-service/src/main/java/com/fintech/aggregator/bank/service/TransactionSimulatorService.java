@@ -1,8 +1,9 @@
 package com.fintech.aggregator.bank.service;
 
-import com.fintech.aggregator.bank.kafka.KafkaTransactionProducer;
 import com.fintech.aggregator.common.events.BankTransactionEvent;
+import com.fintech.aggregator.kafka.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionSimulatorService {
@@ -27,7 +29,7 @@ public class TransactionSimulatorService {
             new BankTemplate("EFT Transfer", new BigDecimal("-1200.00"))
     );
 
-    private final KafkaTransactionProducer producer;
+    private final KafkaEventPublisher<BankTransactionEvent> eventPublisher;
 
     @Value("${bank.simulator.interval-ms:60000}")
     private long intervalMs;
@@ -45,7 +47,9 @@ public class TransactionSimulatorService {
                 .postedAt(Instant.now())
                 .build();
 
-        producer.publish(event);
+        log.debug("Simulating bank transaction customerId={} eventId={} narrative={}",
+                customerId, event.getTransactionRef(), template.description());
+        eventPublisher.publish(event);
     }
 
     private record BankTemplate(String description, BigDecimal amount) {

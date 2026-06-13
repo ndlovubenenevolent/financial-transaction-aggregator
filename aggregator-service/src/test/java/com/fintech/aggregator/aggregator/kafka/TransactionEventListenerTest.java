@@ -1,15 +1,17 @@
 package com.fintech.aggregator.aggregator.kafka;
 
-import com.fintech.aggregator.aggregator.service.TransactionPersistenceService;
-import com.fintech.aggregator.aggregator.service.normalizer.BankTransactionNormalizer;
-import com.fintech.aggregator.aggregator.service.normalizer.CardTransactionNormalizer;
-import com.fintech.aggregator.aggregator.service.normalizer.InvestmentTransactionNormalizer;
 import com.fintech.aggregator.aggregator.entity.Transaction;
+import com.fintech.aggregator.aggregator.kafka.handler.BankTransactionHandler;
+import com.fintech.aggregator.aggregator.kafka.handler.CardTransactionHandler;
+import com.fintech.aggregator.aggregator.kafka.handler.InvestmentTransactionHandler;
+import com.fintech.aggregator.aggregator.service.CategoryEnricher;
+import com.fintech.aggregator.aggregator.service.TransactionPersistenceService;
 import com.fintech.aggregator.common.enums.TransactionCategory;
 import com.fintech.aggregator.common.enums.TransactionSource;
 import com.fintech.aggregator.common.events.BankTransactionEvent;
 import com.fintech.aggregator.common.events.CardTransactionEvent;
 import com.fintech.aggregator.common.events.InvestmentTransactionEvent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,13 +29,13 @@ import static org.mockito.Mockito.when;
 class TransactionEventListenerTest {
 
     @Mock
-    private BankTransactionNormalizer bankTransactionNormalizer;
+    private TransactionIngestionService ingestionService;
     @Mock
-    private CardTransactionNormalizer cardTransactionNormalizer;
+    private BankTransactionHandler bankTransactionHandler;
     @Mock
-    private InvestmentTransactionNormalizer investmentTransactionNormalizer;
+    private CardTransactionHandler cardTransactionHandler;
     @Mock
-    private TransactionPersistenceService persistenceService;
+    private InvestmentTransactionHandler investmentTransactionHandler;
 
     @InjectMocks
     private TransactionEventListener listener;
@@ -47,12 +49,10 @@ class TransactionEventListenerTest {
                 .value(new BigDecimal("1000"))
                 .postedAt(Instant.now())
                 .build();
-        Transaction transaction = sampleTransaction(TransactionSource.BANK);
-        when(bankTransactionNormalizer.normalize(event)).thenReturn(transaction);
 
         listener.onBankTransaction(event);
 
-        verify(persistenceService).saveIfNotExists(transaction);
+        verify(ingestionService).ingest(event, bankTransactionHandler);
     }
 
     @Test
@@ -64,12 +64,10 @@ class TransactionEventListenerTest {
                 .chargeAmount(new BigDecimal("-50"))
                 .purchaseDate(Instant.now())
                 .build();
-        Transaction transaction = sampleTransaction(TransactionSource.CARD);
-        when(cardTransactionNormalizer.normalize(event)).thenReturn(transaction);
 
         listener.onCardTransaction(event);
 
-        verify(persistenceService).saveIfNotExists(transaction);
+        verify(ingestionService).ingest(event, cardTransactionHandler);
     }
 
     @Test
@@ -81,24 +79,9 @@ class TransactionEventListenerTest {
                 .netAmount(new BigDecimal("-2000"))
                 .settlementDate(Instant.now())
                 .build();
-        Transaction transaction = sampleTransaction(TransactionSource.INVESTMENT);
-        when(investmentTransactionNormalizer.normalize(event)).thenReturn(transaction);
 
         listener.onInvestmentTransaction(event);
 
-        verify(persistenceService).saveIfNotExists(transaction);
-    }
-
-    private Transaction sampleTransaction(TransactionSource source) {
-        return Transaction.builder()
-                .id(UUID.randomUUID())
-                .externalTransactionId("EXT-1")
-                .customerId("CUST-001")
-                .source(source)
-                .category(TransactionCategory.OTHER)
-                .description("Test")
-                .amount(BigDecimal.TEN)
-                .transactionDate(Instant.now())
-                .build();
+        verify(ingestionService).ingest(event, investmentTransactionHandler);
     }
 }

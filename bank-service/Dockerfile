@@ -2,12 +2,14 @@ FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY common-events/pom.xml common-events/pom.xml
+COPY common-kafka/pom.xml common-kafka/pom.xml
 COPY bank-service/pom.xml bank-service/pom.xml
 COPY credit-card-service/pom.xml credit-card-service/pom.xml
 COPY investment-service/pom.xml investment-service/pom.xml
 COPY aggregator-service/pom.xml aggregator-service/pom.xml
 RUN mvn -pl bank-service -am dependency:go-offline -B
 COPY common-events/src common-events/src
+COPY common-kafka/src common-kafka/src
 COPY bank-service/src bank-service/src
 RUN mvn -pl bank-service -am package -DskipTests -B
 

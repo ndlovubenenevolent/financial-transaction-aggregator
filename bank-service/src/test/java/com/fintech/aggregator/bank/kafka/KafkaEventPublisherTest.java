@@ -2,6 +2,7 @@ package com.fintech.aggregator.bank.kafka;
 
 import com.fintech.aggregator.common.KafkaTopics;
 import com.fintech.aggregator.common.events.BankTransactionEvent;
+import com.fintech.aggregator.kafka.KafkaEventPublisher;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -29,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, topics = {KafkaTopics.BANK_TRANSACTIONS})
 @DirtiesContext
-class KafkaTransactionProducerTest {
+class KafkaEventPublisherTest {
 
     @Autowired
-    private KafkaTransactionProducer producer;
+    private KafkaEventPublisher<BankTransactionEvent> eventPublisher;
 
     @Autowired
     private EmbeddedKafkaBroker embeddedKafkaBroker;
@@ -50,7 +51,7 @@ class KafkaTransactionProducerTest {
                 .postedAt(Instant.now())
                 .build();
 
-        producer.publish(event);
+        eventPublisher.publish(event);
 
         Map<String, Object> consumerProps = new HashMap<>(KafkaTestUtils.consumerProps("test-group", "true", embeddedKafkaBroker));
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

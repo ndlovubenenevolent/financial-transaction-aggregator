@@ -1,7 +1,7 @@
 package com.fintech.aggregator.bank.service;
 
-import com.fintech.aggregator.bank.kafka.KafkaTransactionProducer;
 import com.fintech.aggregator.common.events.BankTransactionEvent;
+import com.fintech.aggregator.kafka.KafkaEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 class TransactionSimulatorServiceTest {
 
     @Mock
-    private KafkaTransactionProducer producer;
+    private KafkaEventPublisher<BankTransactionEvent> eventPublisher;
 
     @InjectMocks
     private TransactionSimulatorService simulatorService;
@@ -26,7 +26,7 @@ class TransactionSimulatorServiceTest {
         simulatorService.generateTransaction();
 
         ArgumentCaptor<BankTransactionEvent> captor = ArgumentCaptor.forClass(BankTransactionEvent.class);
-        verify(producer).publish(captor.capture());
+        verify(eventPublisher).publish(captor.capture());
         BankTransactionEvent event = captor.getValue();
         assertThat(event.getTransactionRef()).startsWith("BANK-");
         assertThat(event.getAccountHolderId()).startsWith("CUST-");

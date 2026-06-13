@@ -29,5 +29,9 @@ management:
       show-details: always
 
 logging:
+  level:
+    com.fintech.aggregator: INFO
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - customerId=%X{customerId} eventId=%X{eventId} - %msg%n"

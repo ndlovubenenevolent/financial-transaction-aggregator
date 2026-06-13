@@ -1,8 +1,9 @@
 package com.fintech.aggregator.investment.service;
 
 import com.fintech.aggregator.common.events.InvestmentTransactionEvent;
-import com.fintech.aggregator.investment.kafka.KafkaTransactionProducer;
+import com.fintech.aggregator.kafka.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionSimulatorService {
@@ -26,7 +28,7 @@ public class TransactionSimulatorService {
             new InvestmentTemplate("Dividend Payment", new BigDecimal("350.00"))
     );
 
-    private final KafkaTransactionProducer producer;
+    private final KafkaEventPublisher<InvestmentTransactionEvent> eventPublisher;
 
     @Scheduled(fixedDelayString = "${investment.simulator.interval-ms:60000}")
     public void generateTransaction() {
@@ -41,7 +43,9 @@ public class TransactionSimulatorService {
                 .settlementDate(Instant.now())
                 .build();
 
-        producer.publish(event);
+        log.debug("Simulating investment transaction customerId={} eventId={} instrument={}",
+                customerId, event.getTradeId(), template.description());
+        eventPublisher.publish(event);
     }
 
     private record InvestmentTemplate(String description, BigDecimal amount) {

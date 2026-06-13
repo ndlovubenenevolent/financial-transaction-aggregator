@@ -1,7 +1,7 @@
 package com.fintech.aggregator.aggregator.service;
 
 import com.fintech.aggregator.aggregator.dto.MonthlySummaryResponse;
-import com.fintech.aggregator.aggregator.repository.TransactionRepository;
+import com.fintech.aggregator.aggregator.repository.TransactionAnalyticsRepository;
 import com.fintech.aggregator.common.enums.TransactionCategory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 class SummaryServiceTest {
 
     @Mock
-    private TransactionRepository transactionRepository;
+    private TransactionAnalyticsRepository analyticsRepository;
 
     @InjectMocks
     private SummaryService summaryService;
@@ -31,11 +31,11 @@ class SummaryServiceTest {
     @Test
     void shouldBuildMonthlySummary() {
         YearMonth yearMonth = YearMonth.of(2025, 6);
-        when(transactionRepository.sumIncomeForPeriod(eq("CUST-001"), any(Instant.class), any(Instant.class)))
+        when(analyticsRepository.sumIncomeForPeriod(eq("CUST-001"), any(Instant.class), any(Instant.class)))
                 .thenReturn(new BigDecimal("45000.00"));
-        when(transactionRepository.sumExpensesForPeriod(eq("CUST-001"), any(Instant.class), any(Instant.class)))
+        when(analyticsRepository.sumExpensesForPeriod(eq("CUST-001"), any(Instant.class), any(Instant.class)))
                 .thenReturn(new BigDecimal("1500.00"));
-        when(transactionRepository.sumMonthlyExpensesByCategory(eq("CUST-001"), any(Instant.class), any(Instant.class)))
+        when(analyticsRepository.sumMonthlyExpensesByCategory(eq("CUST-001"), any(Instant.class), any(Instant.class)))
                 .thenReturn(List.<Object[]>of(new Object[]{TransactionCategory.GROCERIES, new BigDecimal("650.00")}));
 
         MonthlySummaryResponse response = summaryService.getMonthlySummary("CUST-001", yearMonth);
@@ -48,11 +48,11 @@ class SummaryServiceTest {
     @Test
     void shouldReturnEmptySpendingMapWhenNoExpenses() {
         YearMonth yearMonth = YearMonth.of(2025, 6);
-        when(transactionRepository.sumIncomeForPeriod(eq("CUST-001"), any(Instant.class), any(Instant.class)))
+        when(analyticsRepository.sumIncomeForPeriod(eq("CUST-001"), any(Instant.class), any(Instant.class)))
                 .thenReturn(BigDecimal.ZERO);
-        when(transactionRepository.sumExpensesForPeriod(eq("CUST-001"), any(Instant.class), any(Instant.class)))
+        when(analyticsRepository.sumExpensesForPeriod(eq("CUST-001"), any(Instant.class), any(Instant.class)))
                 .thenReturn(BigDecimal.ZERO);
-        when(transactionRepository.sumMonthlyExpensesByCategory(eq("CUST-001"), any(Instant.class), any(Instant.class)))
+        when(analyticsRepository.sumMonthlyExpensesByCategory(eq("CUST-001"), any(Instant.class), any(Instant.class)))
                 .thenReturn(List.of());
 
         MonthlySummaryResponse response = summaryService.getMonthlySummary("CUST-001", yearMonth);
