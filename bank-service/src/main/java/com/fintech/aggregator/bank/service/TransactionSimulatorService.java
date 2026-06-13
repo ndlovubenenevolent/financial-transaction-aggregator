@@ -4,7 +4,6 @@ import com.fintech.aggregator.common.events.BankTransactionEvent;
 import com.fintech.aggregator.kafka.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -30,9 +29,6 @@ public class TransactionSimulatorService {
     );
 
     private final KafkaEventPublisher<BankTransactionEvent> eventPublisher;
-
-    @Value("${bank.simulator.interval-ms:60000}")
-    private long intervalMs;
 
     @Scheduled(fixedDelayString = "${bank.simulator.interval-ms:60000}")
     public void generateTransaction() {

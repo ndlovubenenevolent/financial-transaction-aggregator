@@ -14,7 +14,7 @@ Investment Service ──► investment-transactions ──┘         │
 - **Java 21**, **Spring Boot 3**, **Maven**
 - **Apache Kafka** (KRaft — no Zookeeper)
 - **PostgreSQL** with Flyway migrations
-- **MapStruct**, **Lombok**, **OpenAPI/Swagger**, **JUnit 5**, **Mockito**, **Testcontainers**
+- **MapStruct**, **Lombok**, **OpenAPI/Swagger**, **JUnit 5**, **Mockito**, **Embedded Kafka** (producer integration tests)
 
 ## Prerequisites
 
@@ -26,7 +26,7 @@ Investment Service ──► investment-transactions ──┘         │
 Clone the repo and start the full stack — no `.env` file required:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 | Service | Port | Description |
@@ -193,6 +193,7 @@ Use the **Authorize** button and enter the API key.
 | GET | `/api/v1/transactions/source/{source}` | Filter by source |
 | GET | `/api/v1/customers/{customerId}/monthly-summary` | Monthly income/expenses |
 | GET | `/api/v1/customers/{customerId}/dashboard` | Balance, breakdown, recent txns |
+| POST | `/api/v1/admin/api-keys/cache/evict` | Evict cached API keys (authenticated) |
 
 ### Example Requests
 
@@ -240,6 +241,7 @@ curl -H "X-API-Key: demo-api-key" \
 | checkers, pick n pay, woolworths | GROCERIES |
 | easyequities, etf purchase, share purchase | INVESTMENTS |
 | eft transfer, transfer | TRANSFERS |
+| eskom, municipality, water bill, electricity | UTILITIES |
 | (unknown) | OTHER |
 
 New rules: implement `CategorizationRule` as a `@Component` — no changes to `CategorizationService` required.
@@ -276,6 +278,7 @@ mvn verify
 ├── credit-card-service/    # Card transaction simulator + producer
 ├── investment-service/     # Investment transaction simulator + producer
 ├── aggregator-service/     # Consumer, normalization, categorization, REST API
+├── scripts/                # API key generation and operational helpers
 ├── docker-compose.yml
 └── pom.xml
 ```
@@ -285,4 +288,6 @@ mvn verify
 ```bash
 curl http://localhost:8080/actuator/health
 curl http://localhost:8081/actuator/health
+curl http://localhost:8082/actuator/health
+curl http://localhost:8083/actuator/health
 ```
