@@ -31,7 +31,7 @@ public class TransactionSimulatorService {
     @Value("${investment.simulator.customer-pool-size:100}")
     private int customerPoolSize = 100;
 
-    @Scheduled(fixedDelayString = "${investment.simulator.interval-ms:60000}")
+    @Scheduled(fixedDelayString = "${investment.simulator.interval-ms:10000}")
     public void generateTransaction() {
         InvestmentTemplate template = TEMPLATES.get(ThreadLocalRandom.current().nextInt(TEMPLATES.size()));
         String customerId = CustomerIdGenerator.randomCustomerId(customerPoolSize);

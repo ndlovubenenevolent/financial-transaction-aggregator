@@ -32,7 +32,7 @@ public class TransactionSimulatorService {
     @Value("${card.simulator.customer-pool-size:100}")
     private int customerPoolSize = 100;
 
-    @Scheduled(fixedDelayString = "${card.simulator.interval-ms:60000}")
+    @Scheduled(fixedDelayString = "${card.simulator.interval-ms:10000}")
     public void generateTransaction() {
         CardTemplate template = TEMPLATES.get(ThreadLocalRandom.current().nextInt(TEMPLATES.size()));
         String customerId = CustomerIdGenerator.randomCustomerId(customerPoolSize);

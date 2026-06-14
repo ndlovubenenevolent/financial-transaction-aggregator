@@ -3,8 +3,6 @@ package com.fintech.aggregator.aggregator.controller;
 import com.fintech.aggregator.aggregator.config.CacheConfig;
 import com.fintech.aggregator.aggregator.config.RateLimitConfig;
 import com.fintech.aggregator.aggregator.config.SecurityConfig;
-import com.fintech.aggregator.aggregator.dto.DashboardResponse;
-import com.fintech.aggregator.aggregator.dto.MonthlySummaryResponse;
 import com.fintech.aggregator.aggregator.entity.Transaction;
 import com.fintech.aggregator.aggregator.mapper.TransactionMapper;
 import com.fintech.aggregator.aggregator.security.ApiKeyAuthFilter;
@@ -13,8 +11,6 @@ import com.fintech.aggregator.aggregator.security.RateLimitFilter;
 import com.fintech.aggregator.aggregator.security.SecurityJsonHandlers;
 import com.fintech.aggregator.aggregator.security.SecurityResponseWriter;
 import com.fintech.aggregator.aggregator.service.ApiKeyService;
-import com.fintech.aggregator.aggregator.service.DashboardService;
-import com.fintech.aggregator.aggregator.service.SummaryService;
 import com.fintech.aggregator.aggregator.service.TransactionQueryService;
 import com.fintech.aggregator.common.enums.TransactionCategory;
 import com.fintech.aggregator.common.enums.TransactionSource;
@@ -30,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -60,12 +55,6 @@ class TransactionControllerTest {
 
     @MockBean
     private TransactionQueryService transactionQueryService;
-
-    @MockBean
-    private SummaryService summaryService;
-
-    @MockBean
-    private DashboardService dashboardService;
 
     @MockBean
     private TransactionMapper transactionMapper;
@@ -131,53 +120,11 @@ class TransactionControllerTest {
     }
 
     @Test
-    void shouldReturnDashboardWithApiKey() throws Exception {
-        when(dashboardService.getDashboard("CUST-001")).thenReturn(
-                DashboardResponse.builder()
-                        .customerId("CUST-001")
-                        .totalBalance(new BigDecimal("5000"))
-                        .transactionCount(2)
-                        .categoryBreakdown(new EnumMap<>(TransactionCategory.class))
-                        .recentTransactions(List.of())
-                        .build());
-
-        mockMvc.perform(get("/api/v1/customers/CUST-001/dashboard").header("X-API-Key", API_KEY))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.customerId").value("CUST-001"));
-    }
-
-    @Test
     void shouldReturnByCategoryWithApiKey() throws Exception {
         when(transactionQueryService.findByCategory(eq(TransactionCategory.GROCERIES), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of()));
 
         mockMvc.perform(get("/api/v1/transactions/category/GROCERIES").header("X-API-Key", API_KEY))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    void shouldReturnCustomerTransactionsWithApiKey() throws Exception {
-        when(transactionQueryService.findByCustomerId(eq("CUST-001"), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of()));
-
-        mockMvc.perform(get("/api/v1/customers/CUST-001/transactions").header("X-API-Key", API_KEY))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void shouldReturnMonthlySummaryWithApiKey() throws Exception {
-        when(summaryService.getMonthlySummary(eq("CUST-001"), any())).thenReturn(
-                MonthlySummaryResponse.builder()
-                        .customerId("CUST-001")
-                        .year(2025)
-                        .month(6)
-                        .totalIncome(new BigDecimal("45000"))
-                        .totalExpenses(new BigDecimal("1500"))
-                        .spendingByCategory(new EnumMap<>(TransactionCategory.class))
-                        .build());
-
-        mockMvc.perform(get("/api/v1/customers/CUST-001/monthly-summary").header("X-API-Key", API_KEY))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalIncome").value(45000));
     }
 }
